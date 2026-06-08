@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTS Pro Studio – Matndan Ovozga</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙</text></svg>">
+<style>
+:root{
+  --bg:#07071a;
+  --card:rgba(16,16,42,.85);
+  --border:rgba(0,212,255,.18);
+  --glow:rgba(0,212,255,.28);
+  --c1:#00d4ff;
+  --c2:#7b2fff;
+  --c3:#00ff88;
+  --c4:#ff00aa;
+  --tx:#dde0ff;
+  --tx2:#7878aa;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ─── BACKGROUND ─────────────────── */
+#bgWrap{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#bgWrap::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 15% 55%,rgba(123,47,255,.18) 0%,transparent 55%),
+             radial-gradient(ellipse at 85% 20%,rgba(0,212,255,.15) 0%,transparent 55%),
+             radial-gradient(ellipse at 50% 95%,rgba(0,255,136,.10) 0%,transparent 55%);
+  animation:bgPulse 9s ease-in-out infinite alternate}
+@keyframes bgPulse{0%{opacity:.55}100%{opacity:1}}
+.star{position:absolute;border-radius:50%;animation:twinkle linear infinite;opacity:0}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(1)}50%{opacity:.7;transform:scale(1.4)}}
+.particle{position:fixed;width:2px;height:2px;border-radius:50%;animation:rise linear infinite;opacity:0;pointer-events:none}
+@keyframes rise{0%{transform:translateY(100vh) translateX(0);opacity:0}10%{opacity:.6}90%{opacity:.25}100%{transform:translateY(-5vh) translateX(60px);opacity:0}}
+
+/* ─── LAYOUT ─────────────────────── */
+.wrap{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:18px 16px 40px}
+
+/* ─── HEADER ─────────────────────── */
+.header{text-align:center;padding:28px 0 16px;animation:slideD .8s ease-out}
+@keyframes slideD{from{transform:translateY(-40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.hico{font-size:3.8rem;display:block;margin-bottom:8px;filter:drop-shadow(0 0 22px var(--c1));animation:icoGlow 2.4s ease-in-out infinite}
+@keyframes icoGlow{0%,100%{transform:scale(1);filter:drop-shadow(0 0 22px var(--c1))}50%{transform:scale(1.08);filter:drop-shadow(0 0 44px var(--c1))}}
+.header h1{font-size:2.4rem;font-weight:800;background:linear-gradient(130deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header p{color:var(--tx2);margin-top:6px;font-size:.9rem}
+
+/* ─── CARD ───────────────────────── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:14px;backdrop-filter:blur(24px);transition:transform .3s,box-shadow .3s;animation:fadeUp .5s ease-out}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 44px var(--glow)}
+.ctitle{font-size:.72rem;font-weight:700;color:var(--c1);text-transform:uppercase;letter-spacing:2.2px;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+
+/* ─── LANGUAGE GRID ──────────────── */
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px}
+.lbtn{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.18);border-radius:11px;padding:10px 6px;cursor:pointer;text-align:center;transition:all .28s;color:var(--tx);font-size:.82rem;user-select:none}
+.lbtn:hover{background:rgba(0,212,255,.14);border-color:var(--c1);transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,212,255,.28)}
+.lbtn.active{background:linear-gradient(130deg,rgba(0,212,255,.2),rgba(123,47,255,.2));border-color:var(--c1);box-shadow:0 0 20px rgba(0,212,255,.28)}
+.lbtn .fl{font-size:1.7rem;display:block;margin-bottom:3px}
+
+/* ─── TEXT AREA ──────────────────── */
+.txarea{width:100%;background:rgba(0,0,20,.5);border:1px solid var(--border);border-radius:13px;padding:14px;color:var(--tx);font-size:1rem;font-family:inherit;resize:vertical;min-height:130px;transition:border-color .3s,box-shadow .3s;outline:none}
+.txarea:focus{border-color:var(--c1);box-shadow:0 0 0 3px rgba(0,212,255,.13)}
+.txarea::placeholder{color:var(--tx2)}
+.charcnt{text-align:right;font-size:.72rem;color:var(--tx2);margin-top:5px}
+
+/* ─── CUSTOM VOICE PICKER ────────── */
+.vpanel{display:flex;align-items:center;gap:8px;margin-bottom:14px;position:relative}
+.vnav{width:38px;height:38px;flex-shrink:0;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.22);border-radius:10px;color:var(--c1);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .25s;user-select:none}
+.vnav:hover{background:rgba(0,212,255,.2);border-color:var(--c1);box-shadow:0 0 16px rgba(0,212,255,.35);transform:scale(1.08)}
+.vnav:active{transform:scale(.93)}
+.vdisplay{flex:1;display:flex;align-items:center;gap:10px;background:rgba(0,0,30,.6);border:1px solid rgba(0,212,255,.22);border-radius:12px;padding:10px 14px;cursor:pointer;transition:all .28s;min-width:0;user-select:none;position:relative}
+.vdisplay:hover{border-color:var(--c1);background:rgba(0,0,30,.8);box-shadow:0 0 18px rgba(0,212,255,.18)}
+.vdisplay.open{border-color:var(--c1);box-shadow:0 0 24px rgba(0,212,255,.28)}
+.vd-ico{font-size:1.4rem;flex-shrink:0;line-height:1}
+.vd-info{flex:1;min-width:0}
+.vd-name{font-size:.88rem;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vd-lang{font-size:.7rem;color:var(--tx2);margin-top:1px}
+.vd-arrow{font-size:.7rem;color:var(--c1);transition:transform .28s;flex-shrink:0}
+.vdisplay.open .vd-arrow{transform:rotate(180deg)}
+.vtestbtn{width:38px;height:38px;flex-shrink:0;background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.25);border-radius:10px;color:var(--c3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all .25s}
+.vtestbtn:hover{background:rgba(0,255,136,.22);border-color:var(--c3);box-shadow:0 0 16px rgba(0,255,136,.3);transform:scale(1.08)}
+.vtestbtn:active{transform:scale(.93)}
+.vcnt{font-size:.68rem;color:var(--tx2);text-align:right;margin-top:-10px;margin-bottom:8px}
+/* Dropdown */
+.vdrop{position:absolute;top:calc(100% + 6px);left:0;right:0;background:rgba(8,8,28,.97);border:1px solid var(--c1);border-radius:14px;z-index:500;overflow:hidden;box-shadow:0 8px 40px rgba(0,212,255,.25);display:none;backdrop-filter:blur(28px)}
+.vdrop.open{display:block;animation:dropIn .22s ease-out}
+@keyframes dropIn{from{opacity:0;transform:translateY(-8px) scaleY(.95)}to{opacity:1;transform:translateY(0) scaleY(1)}}
+.vsearch-wrap{padding:10px 10px 6px;border-bottom:1px solid rgba(0,212,255,.12);position:sticky;top:0;background:rgba(8,8,28,.98);z-index:2}
+.vsearch{width:100%;background:rgba(0,0,20,.7);border:1px solid rgba(0,212,255,.22);border-radius:8px;padding:8px 12px 8px 32px;color:var(--tx);font-size:.83rem;outline:none;transition:border-color .25s}
+.vsearch:focus{border-color:var(--c1)}
+.vsearch-icon{position:absolute;left:19px;top:50%;transform:translateY(-50%);font-size:.85rem;color:var(--tx2);pointer-events:none}
+.vlist{max-height:260px;overflow-y:auto;padding:6px 0;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,.3) transparent}
+.vlist::-webkit-scrollbar{width:4px}
+.vlist::-webkit-scrollbar-track{background:transparent}
+.vlist::-webkit-scrollbar-thumb{background:rgba(0,212,255,.3);border-radius:2px}
+.vgroup-label{font-size:.65rem;font-weight:700;color:var(--c1);text-transform:uppercase;letter-spacing:2px;padding:8px 14px 4px;opacity:.7}
+.vitem{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;transition:background .18s;border-left:3px solid transparent}
+.vitem:hover{background:rgba(0,212,255,.09);border-left-color:rgba(0,212,255,.4)}
+.vitem.selected{background:rgba(0,212,255,.14);border-left-color:var(--c1)}
+.vitem-ico{font-size:1.1rem;flex-shrink:0;width:22px;text-align:center}
+.vitem-info{flex:1;min-width:0}
+.vitem-name{font-size:.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vitem-lang{font-size:.68rem;color:var(--tx2);margin-top:1px}
+.vitem-play{width:24px;height:24px;background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.2);border-radius:6px;color:var(--c3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.65rem;flex-shrink:0;transition:all .2s}
+.vitem-play:hover{background:rgba(0,255,136,.22);border-color:var(--c3);box-shadow:0 0 8px rgba(0,255,136,.3)}
+.vempty{text-align:center;padding:20px;color:var(--tx2);font-size:.82rem}
+/* Sliders / format */
+.srow2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
+.sgrp label{display:block;font-size:.72rem;color:var(--tx2);margin-bottom:5px}
+.sgrp input[type=text],.sgrp input[type=password]{width:100%;background:rgba(0,0,20,.5);border:1px solid var(--border);border-radius:9px;padding:8px 11px;color:var(--tx);font-size:.83rem;cursor:pointer;outline:none;transition:border-color .3s}
+.sgrp input:focus{border-color:var(--c1)}
+.slrow{display:flex;align-items:center;gap:8px}
+.slrow input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:rgba(0,212,255,.18);border-radius:2px;outline:none}
+.slrow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--c1);border-radius:50%;cursor:pointer;box-shadow:0 0 10px var(--c1);transition:transform .2s}
+.slrow input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.35)}
+.slval{font-size:.78rem;color:var(--c1);min-width:34px;text-align:center}
+.fmtrow{display:flex;gap:8px;margin-top:12px}
+.fmtbtn{flex:1;padding:9px 6px;border:1px solid var(--border);border-radius:9px;background:rgba(0,0,20,.5);color:var(--tx);cursor:pointer;text-align:center;font-size:.82rem;transition:all .28s}
+.fmtbtn.active{border-color:var(--c1);background:rgba(0,212,255,.15);color:var(--c1)}
+.fmtbtn:hover{border-color:var(--c1)}
+
+/* ─── VISUALIZER ─────────────────── */
+.visbox{height:90px;background:rgba(0,0,20,.5);border-radius:13px;overflow:hidden;position:relative}
+#vc{width:100%;height:100%;display:block}
+.pbar{height:4px;background:rgba(0,212,255,.1);border-radius:2px;overflow:hidden;margin-top:8px;display:none}
+.pfill{height:100%;background:linear-gradient(90deg,var(--c1),var(--c2));border-radius:2px;width:0%;transition:width .3s}
+
+/* ─── BUTTONS ────────────────────── */
+.btnrow{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+.btn{border:none;border-radius:13px;padding:14px 18px;cursor:pointer;font-size:.88rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .3s;position:relative;overflow:hidden;letter-spacing:.5px}
+.btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.06);opacity:0;transition:opacity .2s}
+.btn:hover::after{opacity:1}
+.btn:active{transform:scale(.97)}
+.btn-gen{background:linear-gradient(130deg,#00d4ff,#7b2fff);color:#fff;box-shadow:0 4px 22px rgba(0,212,255,.38)}
+.btn-gen:hover:not(:disabled){box-shadow:0 8px 32px rgba(0,212,255,.55);transform:translateY(-2px)}
+.btn-gen:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn-play{background:rgba(0,255,136,.13);color:var(--c3);border:1px solid rgba(0,255,136,.3)}
+.btn-play:hover:not(:disabled){background:rgba(0,255,136,.22);box-shadow:0 4px 20px rgba(0,255,136,.28)}
+.btn-dl{background:rgba(255,0,170,.12);color:var(--c4);border:1px solid rgba(255,0,170,.3)}
+.btn-dl:hover:not(:disabled){background:rgba(255,0,170,.22);box-shadow:0 4px 20px rgba(255,0,170,.28)}
+.btn-play:disabled,.btn-dl:disabled{opacity:.35;cursor:not-allowed}
+
+/* ─── STATUS ─────────────────────── */
+.status{display:flex;align-items:center;gap:10px;padding:11px 15px;border-radius:10px;font-size:.87rem;margin-top:12px;transition:all .3s}
+.status.idle{background:rgba(120,120,170,.09);color:var(--tx2)}
+.status.proc{background:rgba(0,212,255,.09);color:var(--c1)}
+.status.ok{background:rgba(0,255,136,.09);color:var(--c3)}
+.status.err{background:rgba(255,80,80,.1);color:#ff5555}
+.sdot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+.status.proc .sdot{animation:blink 1s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+
+/* ─── MODEL LIST ─────────────────── */
+.mcard{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;background:rgba(0,0,20,.5);border:1px solid var(--border);border-radius:11px;margin-bottom:8px;transition:all .3s}
+.mcard:hover{border-color:var(--c1)}
+.minfo h4{font-size:.87rem;font-weight:600}
+.minfo p{font-size:.72rem;color:var(--tx2);margin-top:2px}
+.mbadge{padding:4px 11px;border-radius:20px;font-size:.68rem;font-weight:700;white-space:nowrap;cursor:pointer;transition:all .3s}
+.b-ok{background:rgba(0,255,136,.13);color:var(--c3);border:1px solid rgba(0,255,136,.3)}
+.b-net{background:rgba(0,212,255,.13);color:var(--c1);border:1px solid rgba(0,212,255,.3)}
+.b-dl{background:rgba(123,47,255,.14);color:#aa77ff;border:1px solid rgba(123,47,255,.3)}
+.b-dl:hover{background:rgba(123,47,255,.28)}
+
+/* ─── API PANEL ──────────────────── */
+.apipanel{display:none;margin-top:10px}
+.apipanel input{width:100%;background:rgba(0,0,20,.5);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--tx);font-size:.87rem;outline:none;transition:border-color .3s}
+.apipanel input:focus{border-color:var(--c1)}
+.apipanel .btns{display:flex;gap:8px;margin-top:8px}
+.apipanel .btns .btn{padding:10px 16px;font-size:.82rem}
+
+/* ─── SPINNER ────────────────────── */
+.spin{display:inline-block;animation:spinR .8s linear infinite}
+@keyframes spinR{to{transform:rotate(360deg)}}
+
+/* ─── TOAST ──────────────────────── */
+#toasts{position:fixed;bottom:22px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:7px}
+.toast{padding:11px 18px;border-radius:11px;font-size:.83rem;backdrop-filter:blur(20px);animation:tIn .4s ease-out;max-width:310px;pointer-events:none}
+@keyframes tIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes tOut{to{transform:translateX(120%);opacity:0}}
+.t-ok{background:rgba(0,255,136,.18);border:1px solid rgba(0,255,136,.36);color:var(--c3)}
+.t-err{background:rgba(255,80,80,.18);border:1px solid rgba(255,80,80,.36);color:#ff5555}
+.t-inf{background:rgba(0,212,255,.18);border:1px solid rgba(0,212,255,.36);color:var(--c1)}
+.t-warn{background:rgba(255,170,0,.16);border:1px solid rgba(255,170,0,.34);color:#ffaa00}
+
+/* ─── FOOTER ─────────────────────── */
+.footer{text-align:center;padding:16px;color:var(--tx2);font-size:.77rem;line-height:1.7}
+
+/* ─── RESPONSIVE ─────────────────── */
+@media(max-width:600px){
+  .srow{grid-template-columns:1fr}
+  .btnrow{grid-template-columns:1fr 1fr}
+  .btn-gen{grid-column:1/-1}
+  .lgrid{grid-template-columns:repeat(3,1fr)}
+  .header h1{font-size:1.7rem}
+}
+</style>
+</head>
+<body>
+
+<div id="bgWrap"></div>
+<div id="toasts"></div>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <span class="hico">🎙️</span>
+    <h1>TTS Pro Studio</h1>
+    <p>Matndan Ovozga &bull; Text to Speech &bull; Текст в речь &bull; تبدیل متن به صدا</p>
+  </div>
+
+  <!-- LANGUAGE -->
+  <div class="card" style="animation-delay:.05s">
+    <div class="ctitle">🌍 Til tanlash &bull; Select Language</div>
+    <div class="lgrid" id="lgrid">
+      <div class="lbtn active" data-lang="uz-UZ" onclick="selLang(this)"><span class="fl">🇺🇿</span>O'zbek</div>
+      <div class="lbtn" data-lang="ru-RU" onclick="selLang(this)"><span class="fl">🇷🇺</span>Русский</div>
+      <div class="lbtn" data-lang="en-US" onclick="selLang(this)"><span class="fl">🇺🇸</span>English</div>
+      <div class="lbtn" data-lang="de-DE" onclick="selLang(this)"><span class="fl">🇩🇪</span>Deutsch</div>
+      <div class="lbtn" data-lang="fr-FR" onclick="selLang(this)"><span class="fl">🇫🇷</span>Français</div>
+      <div class="lbtn" data-lang="es-ES" onclick="selLang(this)"><span class="fl">🇪🇸</span>Español</div>
+      <div class="lbtn" data-lang="zh-CN" onclick="selLang(this)"><span class="fl">🇨🇳</span>中文</div>
+      <div class="lbtn" data-lang="ar-SA" onclick="selLang(this)"><span class="fl">🇸🇦</span>العربية</div>
+      <div class="lbtn" data-lang="tr-TR" onclick="selLang(this)"><span class="fl">🇹🇷</span>Türkçe</div>
+      <div class="lbtn" data-lang="ja-JP" onclick="selLang(this)"><span class="fl">🇯🇵</span>日本語</div>
+      <div class="lbtn" data-lang="ko-KR" onclick="selLang(this)"><span class="fl">🇰🇷</span>한국어</div>
+      <div class="lbtn" data-lang="kk-KZ" onclick="selLang(this)"><span class="fl">🇰🇿</span>Қазақша</div>
+      <div class="lbtn" data-lang="uk-UA" onclick="selLang(this)"><span class="fl">🇺🇦</span>Українська</div>
+      <div class="lbtn" data-lang="pl-PL" onclick="selLang(this)"><span class="fl">🇵🇱</span>Polski</div>
+      <div class="lbtn" data-lang="it-IT" onclick="selLang(this)"><span class="fl">🇮🇹</span>Italiano</div>
+      <div class="lbtn" data-lang="pt-PT" onclick="selLang(this)"><span class="fl">🇵🇹</span>Português</div>
+    </div>
+  </div>
+
+  <!-- TEXT INPUT -->
+  <div class="card" style="animation-delay:.1s">
+    <div class="ctitle">📝 Matn kiriting &bull; Enter Text</div>
+    <textarea id="txin" class="txarea" placeholder="Matnni shu yerga yozing yoki yapishiring..." oninput="updChr()"></textarea>
+    <div class="charcnt"><span id="cc">0</span> / 5000 belgi</div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="card" style="animation-delay:.15s">
+    <div class="ctitle">🎤 Ovoz Tanlash &bull; Voice Selector</div>
+
+    <!-- Custom voice picker -->
+    <div class="vpanel" id="vpanel">
+      <button class="vnav" id="vprev" onclick="navVoice(-1)" title="Oldingi ovoz">&#9664;</button>
+      <div class="vdisplay" id="vdisplay" onclick="toggleVDrop()">
+        <div class="vd-ico" id="vdIco">🎙️</div>
+        <div class="vd-info">
+          <div class="vd-name" id="vdName">⚡ Avtomatik ovoz</div>
+          <div class="vd-lang" id="vdLang">Tanlangan tilga ko'ra</div>
+        </div>
+        <div class="vd-arrow">▼</div>
+      </div>
+      <button class="vnav" id="vnext" onclick="navVoice(1)" title="Keyingi ovoz">&#9654;</button>
+      <button class="vtestbtn" onclick="previewVoice()" title="Ovozni sinab ko'rish">🔊</button>
+
+      <!-- Dropdown -->
+      <div class="vdrop" id="vdrop">
+        <div class="vsearch-wrap" style="position:relative">
+          <span class="vsearch-icon">🔍</span>
+          <input class="vsearch" id="vsearch" type="text" placeholder="Ovoz qidirish..." oninput="filterVoices()" autocomplete="off">
+        </div>
+        <div class="vlist" id="vlist"></div>
+      </div>
+    </div>
+    <div class="vcnt" id="vcnt"></div>
+
+    <!-- Speed & Pitch -->
+    <div class="srow2">
+      <div class="sgrp">
+        <label>🐢 Tezlik &bull; Speed: <span id="spv">1.0</span>x</label>
+        <div class="slrow">
+          <span style="font-size:.8rem">0.5</span>
+          <input type="range" id="spsl" min="0.5" max="2" step="0.1" value="1.0" oninput="updSl()">
+          <span style="font-size:.8rem">2.0</span>
+        </div>
+      </div>
+      <div class="sgrp">
+        <label>🎵 Balandlik &bull; Pitch: <span id="ptv">1.0</span></label>
+        <div class="slrow">
+          <span style="font-size:.8rem">0.5</span>
+          <input type="range" id="ptsl" min="0.5" max="2" step="0.1" value="1.0" oninput="updSl()">
+          <span style="font-size:.8rem">2.0</span>
+        </div>
+      </div>
+    </div>
+
+    <label style="display:block;font-size:.72rem;color:var(--tx2);margin:12px 0 6px">
+      📁 Fayl formati &bull; Output Format
+    </label>
+    <div class="fmtrow">
+      <div class="fmtbtn active" onclick="selFmt(this,'wav')">🎵 WAV</div>
+      <div class="fmtbtn" onclick="selFmt(this,'mp3')">🎶 MP3</div>
+      <div class="fmtbtn" onclick="selFmt(this,'ogg')">📻 OGG</div>
+      <div class="fmtbtn" onclick="selFmt(this,'webm')">🔊 WebM</div>
+    </div>
+  </div>
+
+  <!-- VISUALIZER -->
+  <div class="card" style="animation-delay:.2s">
+    <div class="ctitle">🌊 Audio Vizualizer</div>
+    <div class="visbox"><canvas id="vc"></canvas></div>
+    <div class="pbar" id="pbar"><div class="pfill" id="pfill"></div></div>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="card" style="animation-delay:.25s">
+    <div class="btnrow">
+      <button class="btn btn-gen" id="gbtn" onclick="generate()">
+        <span id="gico">✨</span><span id="gtxt">Audio Yaratish</span>
+      </button>
+      <button class="btn btn-play" id="pbtn" onclick="playAudio()" disabled>
+        <span id="pico">▶️</span> Eshitish
+      </button>
+      <button class="btn btn-dl" id="dbtn" onclick="dlAudio()" disabled>
+        💾 Yuklab olish
+      </button>
+    </div>
+    <div class="status idle" id="st"><div class="sdot"></div><span id="stxt">Matn kiriting va "Audio Yaratish" tugmasini bosing</span></div>
+  </div>
+
+  <!-- TTS MODELS -->
+  <div class="card" style="animation-delay:.3s">
+    <div class="ctitle">🤖 TTS Modellari &bull; TTS Engines</div>
+
+    <div class="mcard">
+      <div class="minfo"><h4>⚡ Web Speech API (Offline)</h4><p>Brauzer ichki TTS · Ko'p tillar · Offline ishlaydi · Bepul</p></div>
+      <span class="mbadge b-ok" id="wsaBadge">✅ Tayyor</span>
+    </div>
+
+    <div class="mcard">
+      <div class="minfo"><h4>🌐 Google TTS (Online)</h4><p>Google Translate ovozi · Internet kerak · Yuqori sifat</p></div>
+      <span class="mbadge b-net" onclick="toggleGtts()">🌍 Sozla</span>
+    </div>
+    <div class="apipanel" id="gttsPanel">
+      <p style="font-size:.78rem;color:var(--tx2);margin-bottom:8px">Google TTS brauzer Audio elementi orqali ishlaydi. Quyidagi tugma bilan test qiling:</p>
+      <div class="btns">
+        <button class="btn btn-gen" onclick="testGoogleTts()" style="padding:9px 16px;font-size:.8rem">🔊 Google TTS Test</button>
+        <button class="btn btn-play" onclick="dlGoogleTts()" style="padding:9px 16px;font-size:.8rem">💾 Yuklab olish</button>
+      </div>
+    </div>
+
+    <div class="mcard">
+      <div class="minfo"><h4>🔑 ElevenLabs API (Online)</h4><p>AI ovoz · Ultra yuqori sifat · API kalit kerak</p></div>
+      <span class="mbadge b-dl" onclick="toggleEl()">🔑 API Sozla</span>
+    </div>
+    <div class="apipanel" id="elPanel">
+      <input type="password" id="elKey" placeholder="ElevenLabs API kalitini kiriting (sk_...)">
+      <div class="btns">
+        <button class="btn btn-gen" onclick="saveElKey()" style="padding:9px 16px;font-size:.8rem">💾 Saqlash</button>
+        <button class="btn btn-play" onclick="testEl()" style="padding:9px 16px;font-size:.8rem">🔍 Test</button>
+        <button class="btn btn-dl" onclick="dlWithEl()" style="padding:9px 16px;font-size:.8rem">🎙 Yaratish</button>
+      </div>
+      <p style="font-size:.72rem;color:var(--tx2);margin-top:7px">⚠️ API kalit brauzeringizda saqlanadi. Ommaviy kompyuterda ishlatmang.</p>
+    </div>
+
+    <div class="mcard">
+      <div class="minfo"><h4>🐍 Silero v3_uz (Python Offline)</h4><p>O'zbek TTS modeli · Python app · .pt model fayli</p></div>
+      <span class="mbadge b-dl" onclick="showPyInfo()">📋 Ko'rsatmalar</span>
+    </div>
+    <div class="apipanel" id="pyPanel">
+      <div style="background:rgba(0,0,20,.7);border-radius:10px;padding:14px;font-size:.8rem;color:var(--tx2);line-height:1.8">
+        <strong style="color:var(--c1)">Offline Silero TTS ishlatish uchun:</strong><br>
+        1. <code style="color:var(--c3)">pip install torch scipy tk</code><br>
+        2. <code style="color:var(--c3)">v3_uz.pt</code> modelini shu papkaga joylashtiring<br>
+        3. <code style="color:var(--c3)">tts_app.py</code> faylini ishga tushiring<br><br>
+        <strong style="color:var(--c1)">Yoki bu HTML sahifadan:</strong><br>
+        Web Speech API – oflayn audio eshitish ✅<br>
+        Google TTS – onlayn audio yuklab olish ✅<br>
+        ElevenLabs API – yuqori sifat yuklab olish ✅
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    🎙️ TTS Pro Studio &bull; Matndan Ovozga &bull; v2.0<br>
+    Web Speech API (Offline) &bull; Google TTS &bull; ElevenLabs &bull; Silero v3_uz
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
+let lang       = 'uz-UZ';
+let fmt        = 'wav';
+let voices     = [];
+let isPlaying  = false;
+let audioReady = false;
+let lastText   = '';
+let afx        = null;   // AudioContext for sfx
+let idleAf     = null;
+let waveAf     = null;
+let elKey      = localStorage.getItem('elKey') || '';
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+window.addEventListener('load', () => {
+  buildBg();
+  spawnParticles();
+  initCanvas();
+  loadVoices();
+  idleWave();
+  if (elKey) document.getElementById('elKey').value = elKey;
+  setTimeout(() => { document.getElementById('wsaBadge').textContent = speechSynthesis ? '✅ Tayyor' : '⚠️ Qo\'llanilmaydi'; }, 300);
+});
+
+// ═══════════════════════════════════════
+//  BACKGROUND STARS
+// ═══════════════════════════════════════
+function buildBg() {
+  const wrap = document.getElementById('bgWrap');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;width:${1+Math.random()*2}px;height:${1+Math.random()*2}px;background:#fff;animation-duration:${3+Math.random()*6}s;animation-delay:${Math.random()*6}s`;
+    wrap.appendChild(s);
+  }
+}
+
+function spawnParticles() {
+  const cols = ['#00d4ff','#7b2fff','#00ff88','#ff00aa'];
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const sz = (1 + Math.random() * 3) + 'px';
+    p.style.cssText = `left:${Math.random()*100}vw;width:${sz};height:${sz};background:${cols[i%4]};animation-duration:${16+Math.random()*18}s;animation-delay:${Math.random()*16}s`;
+    document.body.appendChild(p);
+  }
+}
+
+// ═══════════════════════════════════════
+//  VOICE PICKER STATE
+// ═══════════════════════════════════════
+let voiceIdx   = -1;   // -1 = Avtomatik
+let filteredVL = [];   // current filtered list for display
+let vDropOpen  = false;
+
+// ═══════════════════════════════════════
+//  VOICE LOADING
+// ═══════════════════════════════════════
+function loadVoices() {
+  voices = speechSynthesis.getVoices();
+  if (!voices.length) {
+    speechSynthesis.addEventListener('voiceschanged', () => {
+      voices = speechSynthesis.getVoices();
+      buildVoiceList();
+    });
+  } else {
+    buildVoiceList();
+  }
+}
+
+// ─── LANG FLAG MAP ───
+const langFlag = {
+  'uz':'🇺🇿','ru':'🇷🇺','en':'🇺🇸','de':'🇩🇪','fr':'🇫🇷','es':'🇪🇸',
+  'zh':'🇨🇳','ar':'🇸🇦','tr':'🇹🇷','ja':'🇯🇵','ko':'🇰🇷','kk':'🇰🇿',
+  'uk':'🇺🇦','pl':'🇵🇱','it':'🇮🇹','pt':'🇵🇹','nl':'🇳🇱','sv':'🇸🇪',
+  'da':'🇩🇰','fi':'🇫🇮','nb':'🇳🇴','cs':'🇨🇿','sk':'🇸🇰','hu':'🇭🇺',
+  'ro':'🇷🇴','bg':'🇧🇬','hr':'🇭🇷','el':'🇬🇷','he':'🇮🇱','hi':'🇮🇳',
+  'th':'🇹🇭','vi':'🇻🇳','id':'🇮🇩','ms':'🇲🇾','fa':'🇮🇷'
+};
+function vFlag(langCode) {
+  const k = (langCode||'').split(/[-_]/)[0].toLowerCase();
+  return langFlag[k] || '🌐';
+}
+
+// ─── BUILD LIST ───
+function buildVoiceList(filter) {
+  const q    = (filter || '').toLowerCase().trim();
+  const pfx  = lang.split('-')[0].toLowerCase();
+  const pref = voices.filter(v => v.lang.toLowerCase().startsWith(pfx));
+  const rest = voices.filter(v => !v.lang.toLowerCase().startsWith(pfx));
+  const all  = [...pref, ...rest];
+  filteredVL = q ? all.filter(v => v.name.toLowerCase().includes(q) || v.lang.toLowerCase().includes(q)) : all;
+
+  const list = document.getElementById('vlist');
+  list.innerHTML = '';
+
+  const makeItem = (v, idx, preferred) => {
+    const item = document.createElement('div');
+    item.className = 'vitem' + (voiceIdx === idx ? ' selected' : '');
+    item.dataset.idx = idx;
+    item.innerHTML = `
+      <div class="vitem-ico">${vFlag(v.lang)}</div>
+      <div class="vitem-info">
+        <div class="vitem-name">${v.name}</div>
+        <div class="vitem-lang">${v.lang}${v.localService ? ' · 🔌 Offline' : ' · 🌐 Online'}</div>
+      </div>
+      <div class="vitem-play" title="Sinab ko'r" onclick="previewVoiceByIdx(${idx},event)">▶</div>`;
+    item.addEventListener('click', e => { if (e.target.classList.contains('vitem-play')) return; pickVoice(idx); });
+    return item;
+  };
+
+  if (!filteredVL.length) {
+    list.innerHTML = '<div class="vempty">🔍 Ovoz topilmadi</div>';
+    return;
+  }
+
+  // "Avtomatik" item only when no filter
+  if (!q) {
+    const auto = document.createElement('div');
+    auto.className = 'vitem' + (voiceIdx === -1 ? ' selected' : '');
+    auto.dataset.idx = -1;
+    auto.innerHTML = `<div class="vitem-ico">⚡</div><div class="vitem-info"><div class="vitem-name">Avtomatik</div><div class="vitem-lang">Tanlangan tilga ko'ra</div></div>`;
+    auto.addEventListener('click', () => pickVoice(-1));
+    list.appendChild(auto);
+  }
+
+  // Preferred group
+  const prefFlt = filteredVL.filter(v => v.lang.toLowerCase().startsWith(pfx));
+  if (prefFlt.length) {
+    const lbl = document.createElement('div');
+    lbl.className = 'vgroup-label';
+    lbl.textContent = `— Mos ovozlar (${prefFlt.length}) —`;
+    list.appendChild(lbl);
+    prefFlt.forEach(v => { const gi = all.indexOf(v); list.appendChild(makeItem(v, gi, true)); });
+  }
+
+  // Others group
+  const restFlt = filteredVL.filter(v => !v.lang.toLowerCase().startsWith(pfx));
+  if (restFlt.length) {
+    const lbl = document.createElement('div');
+    lbl.className = 'vgroup-label';
+    lbl.textContent = `— Boshqa ovozlar (${restFlt.length}) —`;
+    list.appendChild(lbl);
+    restFlt.forEach(v => { const gi = all.indexOf(v); list.appendChild(makeItem(v, gi, false)); });
+  }
+
+  // Count
+  document.getElementById('vcnt').textContent =
+    `${voices.filter(v=>v.lang.toLowerCase().startsWith(pfx)).length} mos · ${voices.length} jami ovoz`;
+}
+
+// ─── PICK VOICE ───
+function pickVoice(idx) {
+  voiceIdx = idx;
+  const pfx  = lang.split('-')[0].toLowerCase();
+  const all  = [...voices.filter(v=>v.lang.toLowerCase().startsWith(pfx)), ...voices.filter(v=>!v.lang.toLowerCase().startsWith(pfx))];
+  const v    = (idx >= 0 && idx < all.length) ? all[idx] : null;
+  document.getElementById('vdIco').textContent  = v ? vFlag(v.lang) : '⚡';
+  document.getElementById('vdName').textContent = v ? v.name : '⚡ Avtomatik ovoz';
+  document.getElementById('vdLang').textContent = v ? `${v.lang}${v.localService?' · 🔌 Offline':' · 🌐 Online'}` : 'Tanlangan tilga ko\'ra';
+  buildVoiceList(document.getElementById('vsearch').value);
+  closeVDrop();
+  selVSnd();
+  toast(v ? `🎙 ${v.name} tanlandi` : '⚡ Avtomatik ovoz tanlandi', 'inf');
+}
+
+// ─── TOGGLE DROPDOWN ───
+function toggleVDrop() {
+  vDropOpen ? closeVDrop() : openVDrop();
+}
+function openVDrop() {
+  vDropOpen = true;
+  document.getElementById('vdrop').classList.add('open');
+  document.getElementById('vdisplay').classList.add('open');
+  document.getElementById('vsearch').value = '';
+  buildVoiceList();
+  setTimeout(() => { document.getElementById('vsearch').focus(); }, 60);
+  popSnd();
+  // Scroll selected into view
+  setTimeout(() => {
+    const sel = document.querySelector('#vlist .vitem.selected');
+    if (sel) sel.scrollIntoView({block:'center', behavior:'smooth'});
+  }, 150);
+}
+function closeVDrop() {
+  vDropOpen = false;
+  document.getElementById('vdrop').classList.remove('open');
+  document.getElementById('vdisplay').classList.remove('open');
+}
+// Close on outside click
+document.addEventListener('click', e => {
+  if (vDropOpen && !document.getElementById('vpanel').contains(e.target)) closeVDrop();
+});
+
+// ─── SEARCH FILTER ───
+function filterVoices() {
+  buildVoiceList(document.getElementById('vsearch').value);
+}
+
+// ─── KEYBOARD NAV ───
+document.addEventListener('keydown', e => {
+  if (!vDropOpen) return;
+  if (e.key === 'Escape') { closeVDrop(); clkSnd(); return; }
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    const items = document.querySelectorAll('#vlist .vitem');
+    const cur   = Array.from(items).findIndex(i => parseInt(i.dataset.idx) === voiceIdx);
+    let next    = cur + (e.key === 'ArrowDown' ? 1 : -1);
+    if (next < 0) next = items.length - 1;
+    if (next >= items.length) next = 0;
+    if (items[next]) { items[next].scrollIntoView({block:'nearest'}); items[next].style.background='rgba(0,212,255,.16)'; setTimeout(()=>items[next].style.background='',200); }
+    navSnd();
+  }
+  if (e.key === 'Enter' && document.activeElement !== document.getElementById('vsearch')) {
+    const items = document.querySelectorAll('#vlist .vitem');
+    const hover = document.querySelector('#vlist .vitem:focus, #vlist .vitem:hover');
+    if (hover) { const idx = parseInt(hover.dataset.idx); pickVoice(idx); }
+  }
+});
+
+// ─── NAV ARROWS ─── (prev / next)
+function navVoice(dir) {
+  const pfx = lang.split('-')[0].toLowerCase();
+  const all = [...voices.filter(v=>v.lang.toLowerCase().startsWith(pfx)), ...voices.filter(v=>!v.lang.toLowerCase().startsWith(pfx))];
+  if (!all.length) return;
+  // -1 means auto → index 0 on forward, last on back
+  let cur = voiceIdx;
+  if (cur === -1) cur = dir === 1 ? 0 : all.length - 1;
+  else { cur += dir; if (cur < 0) cur = -1; else if (cur >= all.length) cur = -1; }
+  pickVoice(cur);
+  // bounce animation
+  const btn = dir === 1 ? document.getElementById('vnext') : document.getElementById('vprev');
+  btn.style.transform = 'scale(.85)';
+  setTimeout(() => btn.style.transform = '', 180);
+}
+
+// ─── GET SELECTED VOICE OBJ ───
+function getSelVoice() {
+  if (voiceIdx < 0) return null;
+  const pfx = lang.split('-')[0].toLowerCase();
+  const all = [...voices.filter(v=>v.lang.toLowerCase().startsWith(pfx)), ...voices.filter(v=>!v.lang.toLowerCase().startsWith(pfx))];
+  return all[voiceIdx] || null;
+}
+
+// ─── PREVIEW VOICE ───
+function previewVoice() {
+  const previewTexts = {'uz':'Salom, bu ovoz namunasi.','ru':'Привет, это образец голоса.','en':'Hello, this is a voice sample.','de':'Hallo, das ist ein Sprachbeispiel.','fr':'Bonjour, ceci est un exemple de voix.','es':'Hola, esta es una muestra de voz.','zh':'你好，这是语音示例。','ar':'مرحبًا، هذا عينة صوت.','tr':'Merhaba, bu bir ses örneği.','ja':'こんにちは、これは音声サンプルです。','ko':'안녕하세요, 음성 샘플입니다.','kk':'Сәлем, бұл дауыс үлгісі.'};
+  const pfx = lang.split('-')[0].toLowerCase();
+  const txt = previewTexts[pfx] || 'Hello, this is a voice sample.';
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(txt);
+  u.lang  = lang;
+  u.rate  = parseFloat(document.getElementById('spsl').value);
+  u.pitch = parseFloat(document.getElementById('ptsl').value);
+  const v = getSelVoice(); if (v) u.voice = v;
+  const btn = document.querySelector('.vtestbtn');
+  u.onstart = () => { btn.textContent='🛑'; btn.style.background='rgba(0,255,136,.25)'; };
+  u.onend   = () => { btn.textContent='🔊'; btn.style.background=''; };
+  u.onerror = () => { btn.textContent='🔊'; btn.style.background=''; };
+  speechSynthesis.speak(u);
+  clkSnd();
+}
+function previewVoiceByIdx(idx, e) {
+  e.stopPropagation();
+  const pfx = lang.split('-')[0].toLowerCase();
+  const all = [...voices.filter(v=>v.lang.toLowerCase().startsWith(pfx)), ...voices.filter(v=>!v.lang.toLowerCase().startsWith(pfx))];
+  const v   = all[idx]; if (!v) return;
+  const previewTexts = {'uz':'Salom!','ru':'Привет!','en':'Hello!','de':'Hallo!','fr':'Bonjour!','es':'Hola!','zh':'你好！','ar':'مرحبًا!','tr':'Merhaba!','ja':'こんにちは！','ko':'안녕하세요!'};
+  const pfx2 = v.lang.split(/[-_]/)[0].toLowerCase();
+  const txt  = previewTexts[pfx2] || 'Hello!';
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(txt);
+  u.lang = v.lang; u.voice = v;
+  u.rate = parseFloat(document.getElementById('spsl').value);
+  const btn = e.target;
+  u.onstart = () => { btn.textContent='■'; };
+  u.onend = u.onerror = () => { btn.textContent='▶'; };
+  speechSynthesis.speak(u);
+  clkSnd();
+}
+
+// ═══════════════════════════════════════
+//  LANGUAGE SELECT
+// ═══════════════════════════════════════
+function selLang(el) {
+  document.querySelectorAll('.lbtn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  lang = el.dataset.lang;
+  voiceIdx = -1;  // reset to auto on lang change
+  document.getElementById('vdIco').textContent  = '⚡';
+  document.getElementById('vdName').textContent = '⚡ Avtomatik ovoz';
+  document.getElementById('vdLang').textContent = `${lang} tiliga ko'ra`;
+  buildVoiceList();
+  clkSnd();
+  toast(`Til: ${el.textContent.trim().replace(/\s+/g,' ')}`, 'inf');
+}
+
+// ═══════════════════════════════════════
+//  SLIDERS / FORMAT
+// ═══════════════════════════════════════
+function updSl() {
+  document.getElementById('spv').textContent = parseFloat(document.getElementById('spsl').value).toFixed(1);
+  document.getElementById('ptv').textContent = parseFloat(document.getElementById('ptsl').value).toFixed(1);
+  clkSnd();
+}
+
+function selFmt(el, f) {
+  document.querySelectorAll('.fmtbtn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  fmt = f;
+  clkSnd();
+}
+
+function updChr() {
+  const n = document.getElementById('txin').value.length;
+  const el = document.getElementById('cc');
+  el.textContent = n;
+  el.style.color = n > 4500 ? '#ff5555' : n > 3000 ? '#ffaa00' : '';
+}
+
+// ═══════════════════════════════════════
+//  NUMBER NORMALIZER (Uzbek)
+// ═══════════════════════════════════════
+function normNums(t) {
+  const d = {"0":"nol","1":"bir","2":"ikki","3":"uch","4":"to'rt","5":"besh","6":"olti","7":"yetti","8":"sakkiz","9":"to'qqiz"};
+  return t.replace(/\d+/g, m => m.split('').map(c => d[c]).join(' '));
+}
+
+// ═══════════════════════════════════════
+//  BUILD UTTERANCE
+// ═══════════════════════════════════════
+function mkUtt(text) {
+  const u = new SpeechSynthesisUtterance(lang.startsWith('uz') ? normNums(text) : text);
+  u.lang   = lang;
+  u.rate   = parseFloat(document.getElementById('spsl').value);
+  u.pitch  = parseFloat(document.getElementById('ptsl').value);
+  u.volume = 1;
+  const v  = getSelVoice(); if (v) u.voice = v;
+  return u;
+}
+
+// ═══════════════════════════════════════
+//  GENERATE (play + mark ready)
+// ═══════════════════════════════════════
+function generate() {
+  const text = document.getElementById('txin').value.trim();
+  if (!text) { setSt('err','⚠️ Matnni kiriting!'); toast('Matnni kiriting!','err'); return; }
+  clkSnd();
+  lastText = text;
+  audioReady = false;
+
+  const btn = document.getElementById('gbtn');
+  btn.disabled = true;
+  document.getElementById('gico').innerHTML = '<span class="spin">⚙️</span>';
+  document.getElementById('gtxt').textContent = 'Yaratilmoqda...';
+  setSt('proc','⏳ Audio yaratilmoqda...');
+  showPbar(true); progTo(0,35);
+
+  speechSynthesis.cancel();
+  const u = mkUtt(text);
+
+  u.onstart = () => { progTo(35,90); startWave(); isPlaying = true; };
+
+  u.onend = () => {
+    progTo(90,100);
+    setTimeout(() => {
+      stopWave();
+      isPlaying = false;
+      audioReady = true;
+      setSt('ok','✅ Audio tayyor! Eshitish yoki yuklab olish mumkin.');
+      btn.disabled = false;
+      document.getElementById('gico').textContent = '✨';
+      document.getElementById('gtxt').textContent = 'Audio Yaratish';
+      document.getElementById('pbtn').disabled = false;
+      document.getElementById('dbtn').disabled = false;
+      showPbar(false);
+      toast('Audio muvaffaqiyatli yaratildi! 🎉','ok');
+      okSnd();
+    }, 400);
+  };
+
+  u.onerror = e => {
+    btn.disabled = false;
+    document.getElementById('gico').textContent = '✨';
+    document.getElementById('gtxt').textContent = 'Audio Yaratish';
+    setSt('err',`❌ Xatolik: ${e.error}`);
+    toast(`Xatolik: ${e.error}`,'err');
+    showPbar(false); stopWave();
+  };
+
+  speechSynthesis.speak(u);
+}
+
+// ═══════════════════════════════════════
+//  PLAY / STOP
+// ═══════════════════════════════════════
+function playAudio() {
+  if (!lastText) { toast('Avval audio yarating!','err'); return; }
+  clkSnd();
+  if (isPlaying) {
+    speechSynthesis.cancel();
+    isPlaying = false;
+    document.getElementById('pico').textContent = '▶️';
+    stopWave();
+    setSt('ok',"To'xtatildi");
+    return;
+  }
+  const u = mkUtt(lastText);
+  u.onstart  = () => { isPlaying = true; document.getElementById('pico').textContent = '⏹️'; startWave(); setSt('proc','🔊 Eshitilmoqda...'); };
+  u.onend    = () => { isPlaying = false; document.getElementById('pico').textContent = '▶️'; stopWave(); setSt('ok','✅ Tugadi'); };
+  u.onerror  = () => { isPlaying = false; document.getElementById('pico').textContent = '▶️'; stopWave(); };
+  speechSynthesis.speak(u);
+}
+
+// ═══════════════════════════════════════
+//  DOWNLOAD  (Web Speech → MediaRecorder trick)
+// ═══════════════════════════════════════
+function dlAudio() {
+  if (!lastText) { toast('Avval audio yarating!','err'); return; }
+  clkSnd();
+  // Try MediaRecorder capture of speech synthesis
+  // This works on Chrome/Edge (Chromium) via AudioContext capture
+  if (typeof AudioContext !== 'undefined' && typeof MediaRecorder !== 'undefined') {
+    dlCapture();
+  } else {
+    toast('Brauzeringiz audio yozishni qo\'llab-quvvatlamaydi. Google TTS yoki ElevenLabs ishlating.','warn');
+  }
+}
+
+async function dlCapture() {
+  setSt('proc','⏳ Audio yozib olinmoqda...');
+  toast('Audio yozib olinmoqda – iltimos kutib turing...','inf');
+  showPbar(true); progTo(0,20);
+
+  try {
+    // Chrome lets us capture speech synthesis through a workaround with getUserMedia (system audio)
+    // Most reliable: just record and give the user the result
+    const actx = new AudioContext();
+    const dest  = actx.createMediaStreamDestination();
+    // Create a dummy silent source to keep stream alive
+    const buf   = actx.createBuffer(1,1,22050);
+    const src   = actx.createBufferSource(); src.buffer = buf; src.connect(dest); src.start();
+
+    const mimes = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
+    const mime  = mimes.find(m => MediaRecorder.isTypeSupported(m)) || '';
+    const mr    = new MediaRecorder(dest.stream, mime ? {mimeType:mime} : {});
+    const chunks = [];
+    mr.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+    mr.onstop = () => {
+      actx.close();
+      if (!chunks.length) {
+        // Fallback: download via Google TTS
+        toast('Web API yozib bo\'lmadi. Google TTS bilan yuklab olinmoqda...','warn');
+        dlGoogleTts();
+        showPbar(false);
+        return;
+      }
+      const blob = new Blob(chunks, {type: mime || 'audio/webm'});
+      triggerDl(blob, `tts_${Date.now()}.${fmt === 'mp3' ? 'mp3' : fmt === 'ogg' ? 'ogg' : 'webm'}`);
+      showPbar(false);
+      setSt('ok','✅ Audio yuklab olindi!');
+      toast('Audio saqlandi! 💾','ok');
+      okSnd();
+    };
+
+    mr.start(100);
+    progTo(20,70);
+
+    const u = mkUtt(lastText);
+    u.onstart = () => startWave();
+    u.onend = () => {
+      stopWave();
+      progTo(70,100);
+      setTimeout(() => { mr.stop(); }, 600);
+    };
+    u.onerror = () => { mr.stop(); actx.close(); showPbar(false); setSt('err','❌ Xatolik'); };
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+
+  } catch(e) {
+    showPbar(false);
+    setSt('err','⚠️ Yozib bo\'lmadi – Google TTS ishlatilmoqda');
+    dlGoogleTts();
+  }
+}
+
+function triggerDl(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement('a');
+  a.href    = url; a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+
+// ═══════════════════════════════════════
+//  GOOGLE TTS  (unofficial, works for short texts)
+// ═══════════════════════════════════════
+function toggleGtts() { clkSnd(); togglePanel('gttsPanel'); }
+
+function testGoogleTts() {
+  const t = document.getElementById('txin').value.trim() || 'Salom dunyo';
+  const gl = lang.replace(/-.*/, '');
+  const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(t.slice(0,200))}&tl=${gl}&client=tw-ob`;
+  const au = new Audio(url);
+  au.play().catch(() => toast('Google TTS CORS xatosi. Bu normal – yuklab olish uchun tugmani bosing.','warn'));
+  toast('Google TTS bilan eshitilmoqda...','inf');
+}
+
+async function dlGoogleTts() {
+  const text = document.getElementById('txin').value.trim() || lastText;
+  if (!text) { toast('Avval matn kiriting!','err'); return; }
+  clkSnd();
+  const gl  = lang.replace(/-.*/, '');
+  const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text.slice(0,200))}&tl=${gl}&client=tw-ob`;
+  setSt('proc','⏳ Google TTS dan yuklanmoqda...');
+  try {
+    const r    = await fetch(url, {mode:'cors'});
+    const blob = await r.blob();
+    triggerDl(blob, `google_tts_${Date.now()}.mp3`);
+    setSt('ok','✅ Google TTS audio yuklab olindi!');
+    toast('Google TTS audio saqlandi!','ok');
+    okSnd();
+  } catch(e) {
+    // CORS blocked – open in new tab so browser can download
+    window.open(url, '_blank');
+    setSt('ok','ℹ️ Audio yangi tabda ochildi – o\'ng klik → Saqlash');
+    toast('Yangi tabda o\'ng klik → "Audio saqlash" bosing','inf');
+  }
+}
+
+// ═══════════════════════════════════════
+//  ELEVENLABS
+// ═══════════════════════════════════════
+function toggleEl() { clkSnd(); togglePanel('elPanel'); }
+
+function saveElKey() {
+  elKey = document.getElementById('elKey').value.trim();
+  localStorage.setItem('elKey', elKey);
+  toast('API kalit saqlandi! 🔑','ok');
+  okSnd();
+}
+
+async function testEl() {
+  if (!elKey) { toast('Avval API kalitni kiriting!','err'); return; }
+  clkSnd();
+  setSt('proc','🔍 ElevenLabs API tekshirilmoqda...');
+  try {
+    const r = await fetch('https://api.elevenlabs.io/v1/voices', {headers:{'xi-api-key':elKey}});
+    if (r.ok) {
+      const d = await r.json();
+      toast(`✅ API kalit to'g'ri! ${d.voices?.length||0} ovoz mavjud.`,'ok');
+      setSt('ok','✅ ElevenLabs API kalit to\'g\'ri!');
+    } else {
+      throw new Error(`HTTP ${r.status}`);
+    }
+  } catch(e) {
+    setSt('err',`❌ API xatosi: ${e.message}`);
+    toast(`API xatosi: ${e.message}`,'err');
+  }
+}
+
+async function dlWithEl() {
+  const text = document.getElementById('txin').value.trim();
+  if (!text) { toast('Matnni kiriting!','err'); return; }
+  if (!elKey) { toast('API kalitni kiriting!','err'); return; }
+  clkSnd();
+  setSt('proc','⏳ ElevenLabs audio yaratilmoqda...');
+  showPbar(true); progTo(0,40);
+  try {
+    const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM', {
+      method:'POST',
+      headers:{'xi-api-key':elKey,'Content-Type':'application/json','Accept':'audio/mpeg'},
+      body: JSON.stringify({text, model_id:'eleven_multilingual_v2', voice_settings:{stability:.5,similarity_boost:.75}})
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    progTo(40,90);
+    const blob = await r.blob();
+    triggerDl(blob, `elevenlabs_${Date.now()}.mp3`);
+    progTo(90,100);
+    setTimeout(() => showPbar(false),500);
+    setSt('ok','✅ ElevenLabs audio yuklab olindi!');
+    toast('ElevenLabs audio saqlandi! 🎤','ok');
+    okSnd();
+  } catch(e) {
+    showPbar(false);
+    setSt('err',`❌ ElevenLabs xatosi: ${e.message}`);
+    toast(`ElevenLabs xatosi: ${e.message}`,'err');
+  }
+}
+
+// ═══════════════════════════════════════
+//  PANEL TOGGLE
+// ═══════════════════════════════════════
+function togglePanel(id) {
+  const el = document.getElementById(id);
+  el.style.display = el.style.display === 'none' || el.style.display === '' ? 'block' : 'none';
+}
+
+function showPyInfo() { clkSnd(); togglePanel('pyPanel'); }
+
+// ═══════════════════════════════════════
+//  STATUS
+// ═══════════════════════════════════════
+function setSt(cls, msg) {
+  const el = document.getElementById('st');
+  el.className = `status ${cls}`;
+  document.getElementById('stxt').textContent = msg;
+}
+
+// ═══════════════════════════════════════
+//  PROGRESS BAR
+// ═══════════════════════════════════════
+function showPbar(v) { document.getElementById('pbar').style.display = v ? 'block' : 'none'; if (!v) document.getElementById('pfill').style.width='0%'; }
+
+function progTo(from, to) {
+  const fill = document.getElementById('pfill');
+  let cur = from;
+  const step = (to - from) / 28;
+  const iv = setInterval(() => {
+    cur += step; if (cur >= to) { cur = to; clearInterval(iv); }
+    fill.style.width = cur + '%';
+  }, 55);
+}
+
+// ═══════════════════════════════════════
+//  CANVAS / WAVEFORM
+// ═══════════════════════════════════════
+function initCanvas() {
+  const c = document.getElementById('vc');
+  const p = c.parentElement.getBoundingClientRect();
+  c.width = p.width || 800; c.height = 90;
+}
+
+window.addEventListener('resize', initCanvas);
+
+function idleWave() {
+  const c = document.getElementById('vc'), ctx = c.getContext('2d');
+  let t = 0;
+  function fr() {
+    const w = c.width, h = c.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.beginPath();
+    for (let x=0;x<w;x++) {
+      const y = h/2 + Math.sin(x*.018+t)*(7+3*Math.sin(t*.7)) + Math.sin(x*.04+t*1.3)*(4+2*Math.cos(t));
+      x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle='rgba(0,212,255,.28)'; ctx.lineWidth=2; ctx.stroke();
+    t+=.025; idleAf=requestAnimationFrame(fr);
+  }
+  fr();
+}
+
+function startWave() {
+  if (idleAf) { cancelAnimationFrame(idleAf); idleAf=null; }
+  if (waveAf)  { cancelAnimationFrame(waveAf); waveAf=null; }
+  const c = document.getElementById('vc'), ctx = c.getContext('2d');
+  let t=0;
+  const COLS=['rgba(0,212,255,.55)','rgba(123,47,255,.45)','rgba(0,255,136,.4)'];
+  function fr() {
+    const w=c.width,h=c.height;
+    ctx.clearRect(0,0,w,h);
+    for (let i=0;i<3;i++) {
+      const amp=12+Math.sin(t*1.7+i*1.2)*10;
+      const freq=.018+i*.008;
+      ctx.beginPath();
+      for (let x=0;x<w;x++) {
+        const y=h/2+Math.sin(x*freq+t+i*2)*amp+Math.sin(x*freq*.5+t*1.4+i)*amp*.5;
+        x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle=COLS[i]; ctx.lineWidth=2; ctx.stroke();
+    }
+    t+=.05; waveAf=requestAnimationFrame(fr);
+  }
+  fr();
+}
+
+function stopWave() {
+  if (waveAf) { cancelAnimationFrame(waveAf); waveAf=null; }
+  idleWave();
+}
+
+// ═══════════════════════════════════════
+//  SOUND EFFECTS
+// ═══════════════════════════════════════
+function getAFX() {
+  if (!afx) afx = new (window.AudioContext||window.webkitAudioContext)();
+  return afx;
+}
+function sndTone(freq, dur, vol, type='sine', delay=0) {
+  try {
+    const a=getAFX(), o=a.createOscillator(), g=a.createGain();
+    o.connect(g); g.connect(a.destination);
+    o.frequency.value=freq; o.type=type;
+    const t=a.currentTime+delay;
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(vol, t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, t+dur);
+    o.start(t); o.stop(t+dur+0.05);
+  } catch(e){}
+}
+// Click – short soft tick
+function clkSnd() { sndTone(900, .07, .06, 'sine'); }
+// Nav arrow – swoosh up/down
+function navSnd() { sndTone(600,.05,.05,'sine'); sndTone(800,.05,.04,'sine',.05); }
+// Select voice – soft chime
+function selVSnd() { sndTone(1046,.12,.07,'sine'); sndTone(1318,.1,.05,'sine',.09); }
+// Open dropdown – soft pop
+function popSnd() { sndTone(440,.06,.07,'triangle'); sndTone(660,.08,.04,'sine',.04); }
+// Success jingle
+function okSnd() {
+  [523,659,784,1046].forEach((f,i)=>sndTone(f,.22,.10,'sine',i*.12));
+}
+
+// ═══════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════
+function toast(msg, type='inf') {
+  const map={ok:'t-ok',err:'t-err',inf:'t-inf',warn:'t-warn'};
+  const c=document.getElementById('toasts');
+  const d=document.createElement('div');
+  d.className=`toast ${map[type]||'t-inf'}`;
+  d.textContent=msg;
+  c.appendChild(d);
+  setTimeout(()=>{ d.style.animation='tOut .4s ease-in forwards'; setTimeout(()=>d.remove(),400); },3200);
+}
+</script>
+</body>
+</html>
